@@ -26,32 +26,33 @@ const HeaderRight = styled.div`
 
 const Button = styled.button`
     padding: 0.5rem 1rem;
+    background-color: #2575fc;
+    color: white;
     border: none;
     border-radius: 4px;
     cursor: pointer;
     font-size: 0.875rem; /* Smaller font size */
-    transition: background-color 0.3s;
+    &:hover {
+        background-color: #1a5fc4;
+    }
 `;
 
 const AddButton = styled(Button)`
     background-color: #4CAF50; /* Matte green */
-    color: white;
     &:hover {
         background-color: #45a049; /* Darker matte green */
     }
 `;
 
 const EditButton = styled(Button)`
-    background-color: #ffbf00; /* Matte orange */
-    color: white;
+    background-color: #FF8C00; /* Matte orange */
     &:hover {
-        background-color: #d1a100; /* Darker matte orange */
+        background-color: #e07b00; /* Darker matte orange */
     }
 `;
 
 const DeleteButton = styled(Button)`
     background-color: #e74c3c; /* Matte red */
-    color: white;
     &:hover {
         background-color: #c0392b; /* Darker matte red */
     }
@@ -154,8 +155,13 @@ const Dashboard = () => {
     };
 
     const handleProductAdded = (newProduct) => {
-        setProducts([...products, newProduct]);
+        if (editingProduct) {
+            setProducts(products.map(product => product.id === newProduct.id ? newProduct : product));
+        } else {
+            setProducts([...products, newProduct]);
+        }
         setShowAddProduct(false);
+        setEditingProduct(null);
     };
 
     const handleEditProduct = (product) => {
