@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import AddProduct from './AddProduct'; // Ensure this component exists
+import AddProduct from './AddProduct';
 
 const Dashboard = () => {
     const [products, setProducts] = useState([]);
@@ -20,7 +20,6 @@ const Dashboard = () => {
                 setProducts(response.data);
             } catch (err) {
                 console.error('Failed to fetch products', err);
-                // Handle unauthenticated case
                 if (err.response.status === 401) {
                     navigate('/'); // Redirect to login if unauthorized
                 }
@@ -42,7 +41,6 @@ const Dashboard = () => {
             navigate('/'); // Redirect to login page
         } catch (err) {
             console.error('Logout failed', err);
-            // Handle logout errors
         }
     };
 

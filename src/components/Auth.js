@@ -1,13 +1,21 @@
 import React, { useState } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { isAuthenticated } from '../utils/auth';
+
 const Auth = () => {
     const [isLogin, setIsLogin] = useState(true);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [name, setName] = useState(''); // Only used for registration
+    const [name, setName] = useState('');
     const [error, setError] = useState('');
-    const navigate = useNavigate(); // Hook for navigation
+    const navigate = useNavigate();
+
+    // Redirect to Dashboard if user is authenticated
+    if (isAuthenticated()) {
+        navigate('/dashboard');
+        return null; // Prevents rendering the login/register form
+    }
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -16,9 +24,8 @@ const Auth = () => {
                 email,
                 password,
             });
-            const token = response.data.token;
-            localStorage.setItem('token', token);
-            console.log('Logged in successfully');
+            const { token } = response.data;
+            localStorage.setItem('token', token); // Store the token in localStorage
             navigate('/dashboard'); // Redirect to dashboard
         } catch (err) {
             setError(err.response.data.message || 'Login failed');
@@ -33,7 +40,7 @@ const Auth = () => {
                 email,
                 password,
             });
-            setIsLogin(true); // Switch to login form after successful registration
+            setIsLogin(true); // Switch to login form
         } catch (err) {
             setError(err.response.data.message || 'Registration failed');
         }
@@ -75,7 +82,5 @@ const Auth = () => {
         </div>
     );
 };
-
-
 
 export default Auth;

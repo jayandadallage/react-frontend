@@ -19,15 +19,14 @@ const AddProduct = ({ onProductAdded }) => {
         }
 
         try {
+            const token = localStorage.getItem('token');
             const response = await axios.post('http://localhost:8000/api/products', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
-                    Authorization: `Bearer ${localStorage.getItem('token')}`
+                    Authorization: `Bearer ${token}`
                 }
             });
-            if (onProductAdded) {
-                onProductAdded(response.data);
-            }
+            onProductAdded(response.data);
             setName('');
             setPrice('');
             setDescription('');
