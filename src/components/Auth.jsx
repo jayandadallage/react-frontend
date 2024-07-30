@@ -4,12 +4,27 @@ import { useNavigate } from 'react-router-dom';
 import { isAuthenticated } from '../utils/auth';
 import styled from 'styled-components';
 
+// Container for the entire Auth component
 const AuthContainer = styled.div`
+    display: flex;
+    height: 100vh;
+`;
+
+// Left half of the screen with the image
+const ImageContainer = styled.div`
+    flex: 1;
+    background-image: url('/Background.webp');
+    background-size: cover;
+    background-position: center;
+`;
+
+// Right half of the screen with the form
+const FormContainer = styled.div`
+    flex: 1;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 100vh;
     background: linear-gradient(to right, #6a11cb, #2575fc);
 `;
 
@@ -48,9 +63,10 @@ const Button = styled.button`
 const ToggleButton = styled(Button)`
     margin-top: 1rem;
     background-color: transparent;
-    color: #2575fc;
+    color: #fff;
+    font-weight: bold;
     &:hover {
-        color: #1a5fc4;
+        color: #e0e0e0;
     }
 `;
 
@@ -70,7 +86,6 @@ const Auth = () => {
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
-    // Redirect to Dashboard if user is authenticated
     if (isAuthenticated()) {
         navigate('/dashboard');
         return null;
@@ -85,9 +100,10 @@ const Auth = () => {
                 email,
                 password,
             });
-            const { token } = response.data;
-            localStorage.setItem('token', token); // Store the token in localStorage
-            navigate('/dashboard'); // Redirect to dashboard
+            const { token, data: { name } } = response.data;
+            localStorage.setItem('token', token);
+            localStorage.setItem('userName', name); // Store the user's name
+            navigate('/dashboard');
         } catch (err) {
             setError(err.response?.data?.message || 'Login failed');
         } finally {
@@ -122,73 +138,76 @@ const Auth = () => {
 
     return (
         <AuthContainer>
-            <h2>{isLogin ? 'Login' : 'Register'}</h2>
-            <Form onSubmit={isLogin ? handleLogin : handleRegister}>
-                {!isLogin && (
-                    <>
-                        <Input
-                            type="text"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            placeholder="Name"
-                            required
-                        />
-                        <Input
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            placeholder="Email"
-                            required
-                        />
-                        <Input
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            placeholder="Password"
-                            required
-                        />
-                        <Input
-                            type="password"
-                            value={confirmPassword}
-                            onChange={(e) => setConfirmPassword(e.target.value)}
-                            placeholder="Confirm Password"
-                            required
-                        />
-                        <Input
-                            type="text"
-                            value={phoneNumber}
-                            onChange={(e) => setPhoneNumber(e.target.value)}
-                            placeholder="Phone Number"
-                            required
-                        />
-                    </>
-                )}
-                {isLogin && (
-                    <>
-                        <Input
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            placeholder="Email"
-                            required
-                        />
-                        <Input
-                            type="password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            placeholder="Password"
-                            required
-                        />
-                    </>
-                )}
-                <Button type="submit" disabled={loading}>
-                    {loading ? 'Please wait...' : isLogin ? 'Login' : 'Register'}
-                </Button>
-                {error && <ErrorMessage>{error}</ErrorMessage>}
-            </Form>
-            <ToggleButton onClick={() => setIsLogin(!isLogin)}>
-                {isLogin ? 'Need an account? Register' : 'Already have an account? Login'}
-            </ToggleButton>
+            <ImageContainer />
+            <FormContainer>
+                <h2>{isLogin ? 'Login' : 'Register'}</h2>
+                <Form onSubmit={isLogin ? handleLogin : handleRegister}>
+                    {!isLogin && (
+                        <>
+                            <Input
+                                type="text"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                placeholder="Name"
+                                required
+                            />
+                            <Input
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                placeholder="Email"
+                                required
+                            />
+                            <Input
+                                type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                placeholder="Password"
+                                required
+                            />
+                            <Input
+                                type="password"
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                placeholder="Confirm Password"
+                                required
+                            />
+                            <Input
+                                type="text"
+                                value={phoneNumber}
+                                onChange={(e) => setPhoneNumber(e.target.value)}
+                                placeholder="Phone Number"
+                                required
+                            />
+                        </>
+                    )}
+                    {isLogin && (
+                        <>
+                            <Input
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                placeholder="Email"
+                                required
+                            />
+                            <Input
+                                type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                placeholder="Password"
+                                required
+                            />
+                        </>
+                    )}
+                    <Button type="submit" disabled={loading}>
+                        {loading ? 'Please wait...' : isLogin ? 'Login' : 'Register'}
+                    </Button>
+                    {error && <ErrorMessage>{error}</ErrorMessage>}
+                </Form>
+                <ToggleButton onClick={() => setIsLogin(!isLogin)}>
+                    {isLogin ? 'Need an account? Register' : 'Already have an account? Login'}
+                </ToggleButton>
+            </FormContainer>
         </AuthContainer>
     );
 };

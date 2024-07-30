@@ -3,9 +3,11 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import styled from 'styled-components';
 import AddProduct from './AddProduct';
+import ConfirmationModal from './ConfirmationModal';
 
 const DashboardContainer = styled.div`
     padding: 2rem;
+    background: #f5f5f5; /* Lighter matte background */
 `;
 
 const Header = styled.div`
@@ -13,11 +15,20 @@ const Header = styled.div`
     justify-content: space-between;
     align-items: center;
     margin-bottom: 2rem;
+    background: #fff;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 `;
 
 const HeaderLeft = styled.div`
     display: flex;
     gap: 1rem;
+    align-items: center;
+`;
+
+const HeaderTitle = styled.h2`
+    margin: 0;
 `;
 
 const HeaderRight = styled.div`
@@ -62,6 +73,22 @@ const ProductListContainer = styled.div`
     display: flex;
     flex-direction: column;
     align-items: flex-start;
+`;
+
+const ProductListHeader = styled.div`
+    background: #fff;
+    padding: 1rem;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+`;
+
+const ProductListHeaderTitle = styled.h3`
+    margin: 0;
 `;
 
 const ProductList = styled.div`
@@ -112,6 +139,8 @@ const Dashboard = () => {
     const [products, setProducts] = useState([]);
     const [showAddProduct, setShowAddProduct] = useState(false);
     const [editingProduct, setEditingProduct] = useState(null);
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
+    const [productToDelete, setProductToDelete] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -169,26 +198,35 @@ const Dashboard = () => {
         setShowAddProduct(true);
     };
 
-    const handleDeleteProduct = async (productId) => {
-        try {
-            const token = localStorage.getItem('token');
-            await axios.delete(`http://localhost:8000/api/products/${productId}`, {
-                headers: {
-                    Authorization: `Bearer ${token}`
-                }
-            });
-            // Remove the product from the state
-            setProducts(products.filter(product => product.id !== productId));
-        } catch (err) {
-            console.error('Failed to delete product', err);
+    const handleDeleteProduct = async () => {
+        if (productToDelete) {
+            try {
+                const token = localStorage.getItem('token');
+                await axios.delete(`http://localhost:8000/api/products/${productToDelete}`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`
+                    }
+                });
+                // Remove the product from the state
+                setProducts(products.filter(product => product.id !== productToDelete));
+                setProductToDelete(null);
+                setShowConfirmModal(false);
+            } catch (err) {
+                console.error('Failed to delete product', err);
+            }
         }
+    };
+
+    const confirmDelete = (productId) => {
+        setProductToDelete(productId);
+        setShowConfirmModal(true);
     };
 
     return (
         <DashboardContainer>
             <Header>
                 <HeaderLeft>
-                    <h2>Dashboard</h2>
+                    <HeaderTitle>Product Management System</HeaderTitle>
                     <AddButton onClick={() => setShowAddProduct(!showAddProduct)}>
                         {showAddProduct ? 'Cancel' : 'Add Product'}
                     </AddButton>
@@ -198,8 +236,10 @@ const Dashboard = () => {
                 </HeaderRight>
             </Header>
             {showAddProduct && <AddProduct onProductAdded={handleProductAdded} editingProduct={editingProduct} />}
+            <Header>
+                <ProductListHeaderTitle>Product List</ProductListHeaderTitle>
+            </Header>
             <ProductListContainer>
-                <h3>Product List</h3>
                 <ProductList>
                     {products.map(product => (
                         <ProductCard key={product.id}>
@@ -209,12 +249,19 @@ const Dashboard = () => {
                             <ProductDescription>{product.description}</ProductDescription>
                             <ButtonGroup>
                                 <EditButton onClick={() => handleEditProduct(product)}>Edit</EditButton>
-                                <DeleteButton onClick={() => handleDeleteProduct(product.id)}>Delete</DeleteButton>
+                                <DeleteButton onClick={() => confirmDelete(product.id)}>Delete</DeleteButton>
                             </ButtonGroup>
                         </ProductCard>
                     ))}
                 </ProductList>
             </ProductListContainer>
+            {showConfirmModal && (
+                <ConfirmationModal
+                    message="Are you sure you want to delete this product?"
+                    onConfirm={handleDeleteProduct}
+                    onCancel={() => setShowConfirmModal(false)}
+                />
+            )}
         </DashboardContainer>
     );
 };
