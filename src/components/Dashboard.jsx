@@ -142,6 +142,7 @@ const Dashboard = () => {
     const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [productToDelete, setProductToDelete] = useState(null);
     const navigate = useNavigate();
+    const userName = localStorage.getItem('userName'); // Retrieve the user's name
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -155,7 +156,7 @@ const Dashboard = () => {
                 });
 
                 // Convert response data to an array of products
-                const productsData = Object.values(response.data); // Convert object to array
+                const productsData = Object.values(response.data);
                 setProducts(productsData);
             } catch (err) {
                 console.error('Failed to fetch products', err);
@@ -177,17 +178,20 @@ const Dashboard = () => {
                 }
             });
             localStorage.removeItem('token'); // Remove token from local storage
+            localStorage.removeItem('userName'); // Remove user's name from local storage
             navigate('/'); // Redirect to login page
         } catch (err) {
             console.error('Logout failed', err);
         }
     };
-
+    
     const handleProductAdded = (newProduct) => {
         if (editingProduct) {
+            // If updating an existing product, replace it in the list
             setProducts(products.map(product => product.id === newProduct.id ? newProduct : product));
         } else {
-            setProducts([...products, newProduct]);
+            // If adding a new product, insert it at the beginning of the array
+            setProducts([newProduct, ...products]);
         }
         setShowAddProduct(false);
         setEditingProduct(null);
@@ -232,7 +236,9 @@ const Dashboard = () => {
                     </AddButton>
                 </HeaderLeft>
                 <HeaderRight>
-                    <Button onClick={handleLogout}>Logout</Button>
+                    <Button onClick={handleLogout}>
+                        Logout ({userName})
+                    </Button>
                 </HeaderRight>
             </Header>
             {showAddProduct && <AddProduct onProductAdded={handleProductAdded} editingProduct={editingProduct} />}
